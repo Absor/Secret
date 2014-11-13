@@ -2,11 +2,8 @@
 using System.Collections;
 using UnityEngine.Events;
 
-public class WorldGenerator : AutowiredMonoBehaviour
+public class WorldGenerator : InjectedMonoBehaviour
 {
-    public class WorldGenerateEvent : UnityEvent { }
-    public readonly WorldGenerateEvent OnWorldGenerate = new WorldGenerateEvent();
-
     [SerializeField]
     private int worldSizeX = 160;
     [SerializeField]
@@ -14,12 +11,13 @@ public class WorldGenerator : AutowiredMonoBehaviour
     [SerializeField]
     private int worldSizeZ = 160;
 
-    [Autowired]
+    [Inject]
     private World world;
-    [Autowired]
+    [Inject]
     private BlockStore blockStore;
 
-	void Start () {
+    [ContextMenu("Create World")]
+	public void CreateWorld () {
         world.SetupNewWorld(worldSizeX, worldSizeY, worldSizeZ);
 
         for (int x = 0; x < world.WorldSizeX; x++)
@@ -28,23 +26,28 @@ public class WorldGenerator : AutowiredMonoBehaviour
             {
                 for (int z = 0; z < world.WorldSizeZ; z++)
                 {
-                    Block block = generateBlock(x, y, z, worldSizeX, worldSizeY, worldSizeZ);
-                    world.SetBlock(x, y, z, block);
+                    world.SetBlock(x, y, z, blockStore.GetBlock(BlockType.Air));
                 }
             }
         }
-        OnWorldGenerate.Invoke();
+
+        for (int x = 0; x < world.WorldSizeX; x++)
+        {
+            for (int z = 0; z < world.WorldSizeZ; z++)
+            {
+                int yLevel = Random.Range(1, 40);
+                for (int y = 0; y < yLevel; y++) {
+                    world.SetBlock(x, y, z, blockStore.GetBlock(BlockType.Grass));
+                }
+            }
+        }
+
+        world.OnWorldCreated.Invoke();
 	}
 
     private Block generateBlock(int x, int y, int z, int worldSizeX, int worldSizeY, int worldSizeZ)
     {
-        if (y == 0)
-        {
-            return blockStore.GetBlock(BlockType.Grass);
-        }
-        else
-        {
+
             return blockStore.GetBlock(BlockType.Air);
-        }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
 
 [AttributeUsage(AttributeTargets.Field)]
-public class Autowired : Attribute
+public class Inject : Attribute
 {
 }
