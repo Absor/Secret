@@ -18,6 +18,8 @@ public class WorldGenerator : InjectedMonoBehaviour
 
     [ContextMenu("Create World")]
 	public void CreateWorld () {
+        SimplexNoise simplexNoise = new SimplexNoise();
+
         world.SetupNewWorld(worldSizeX, worldSizeY, worldSizeZ);
 
         for (int x = 0; x < world.WorldSizeX; x++)
@@ -35,12 +37,14 @@ public class WorldGenerator : InjectedMonoBehaviour
         {
             for (int z = 0; z < world.WorldSizeZ; z++)
             {
-                int yLevel = Random.Range(1, 40);
-                for (int y = 0; y < yLevel; y++) {
+                int noise = (int) (simplexNoise.Noise(x, z) + 1);
+
+                for (int y = 0; y <= noise; y++)
+                {
                     world.SetBlock(x, y, z, blockStore.GetBlock(BlockType.Grass));
                 }
             }
-        }
+        }        
 
         world.OnWorldCreated.Invoke();
 	}
